@@ -46,6 +46,11 @@
                 <i class="far fa-envelope"></i>
                 <input type="email" name="email" placeholder="E-mail" v-model="email" required>
               </div>
+              <div class="groupForm">
+                <i class="far fa-key"></i>
+                <input type="password" name="password" placeholder="Senha" v-model="password" required>
+                <i class="far fa-eye buttom"></i>
+              </div>
               <button
                   :class="[
                       'btn',
@@ -53,16 +58,11 @@
                       loading ? 'loading' : ''
                   ]"
                   type="submit"
-                  @click.prevent="forgetPassword">
-                <span v-if="loading">Recuperando...</span>
-                <span v-else>Recuperar Senha</span>
+                  @click.prevent="auth">
+                <span v-if="loading">Alterando...</span>
+                <span v-else>Altualizar Senha</span>
               </button>
             </form>
-            <span>
-                <p class="fontSmall">Acessar?
-                <router-link :to="{name: 'auth'}" class="link primary">Clique aqui</router-link>
-                </p>
-            </span>
           </div>
           <span class="copyright fontSmall">
               Todos os Direitos reservados - <b>Especializati</b>
@@ -74,25 +74,41 @@
 </template>
 <script>
 import {ref} from "vue";
-import { useStore } from 'vuex'
+import router from "@/router";
+import ResetPasswordService from "@/services/password.reset.service";
 import { notify } from "@kyvg/vue3-notification";
 
 export default {
-  name: 'ForgetPassword',
-  setup() {
-    const store = useStore()
+  name: 'ResetPassword',
+  props: {
+    token: {
+      require: true,
+    }
+  },
+  setup(props) {
     const email = ref("")
+    const password = ref("")
     const loading = ref(false)
 
-    const forgetPassword  = () => {
+    const typePassword = ref('password')
+    const toggleShowPassword = () => typePassword.value = typePassword.value === 'password' ? 'text' : 'password'
+
+
+    const auth = () => {
       loading.value = true
 
-      store
-          .dispatch('forgetPassword', {email: email.value})
-          .then(() => notify({
-            title: 'Sucesso',
-            text: 'Confira o seu e-mail'
-          }))
+      ResetPasswordService.reset({
+        email: email.value,
+        password: password.value,
+        token: props.token,
+      })
+          .then(() => {
+            notify({
+              title: 'Sucesso',
+              text: 'Senha Atualizada com sucesso'
+            })
+            router.push({name: 'auth'})
+          })
           .catch(() => notify({
             title: 'Falha',
             text: 'Falha ao recuperar o usuário',
@@ -100,10 +116,14 @@ export default {
           }))
           .finally(() => loading.value = false)
     }
-    return {
+
+    return{
+      auth,
       email,
-      forgetPassword,
+      password,
       loading,
+      typePassword,
+      toggleShowPassword
     }
   }
 }
