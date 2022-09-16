@@ -1,18 +1,21 @@
 <template>
   <div class="comments" v-show="lesson.name">
     <div class="header">
-      <span class="title">Dúvidas (total: {{supports.length}})<span v-if="loading">(Carregando...)</span></span>
-      <button class="btn primary" @click.prevent="modal.showModal = true">
+      <span class="title">Dúvidas (total: {{ supports.length }}) <span v-if="loading">(Carregando...)</span> </span>
+      <button class="btn primary"
+              @click.prevent="openModal">
         <i class="fas fa-plus"></i>
         Enviar nova dúvida
       </button>
     </div>
-    <supports></supports>
+
+    <supports/>
 
     <modal-support
         :show-modal="modal.showModal"
         :support-reply="modal.supportReply"
-        @closeModal="modal.showModal = false"></modal-support>
+        @closeModal="modal.showModal = false">
+    </modal-support>
   </div>
 </template>
 
@@ -41,6 +44,8 @@ export default {
       supportReply: ''
     })
 
+    const openModal = () => modal.value = {showModal: true, supportReply: ''}
+
     watch(
         () => store.state.courses.lessonPlayer,
         () => {
@@ -51,12 +56,12 @@ export default {
         }
     )
 
-
     return {
       lesson,
       loading,
       supports,
-      modal
+      modal,
+      openModal,
     }
   }
 

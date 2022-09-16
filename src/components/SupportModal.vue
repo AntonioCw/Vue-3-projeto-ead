@@ -49,10 +49,8 @@
 </template>
 
 <script>
-
-import {computed, ref} from "vue";
-import {useStore} from "vuex";
-
+import { computed, ref } from 'vue'
+import { useStore } from 'vuex'
 export default {
   name: "ModalSupport",
   props: {
@@ -64,41 +62,38 @@ export default {
     supportReply: {
       require: true,
       type: String,
-      default: "",
+      default: ""
     }
   },
   emits: ['closeModal'],
-  setup(props, {emit}){
-    props.supportReply
-
+  setup(props, {emit}) {
     const store = useStore()
     const lesson = computed(() => store.state.courses.lessonPlayer)
     const description = ref('')
     const loading = ref(false)
-
     const sendForm = () => {
       loading.value = true
-
       const params = {
         lesson: lesson.value.id,
         description: description.value,
-        status: 'P'
+        status: 'P',
+        support: props.supportReply,
       }
-
-      store.dispatch('createSupport', params).then(() => {
-        description.value = ''
-
-        emit('closeModal')
-      })
+      let actionName = 'createSupport'
+      if (props.supportReply != '')
+        actionName = 'createNewReplyToSupport'
+      store.dispatch(actionName, params)
+          .then(() => {
+            description.value = ''
+            emit('closeModal')
+          })
           .finally(() => loading.value = false)
     }
-
     return {
       description,
       loading,
-      sendForm
+      sendForm,
     }
   }
-
 }
 </script>
